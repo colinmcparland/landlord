@@ -1,4 +1,4 @@
-[# Landlord](https://landlord.tinybird.ca)
+# [Landlord](https://landlord.tinybird.ca)
 Landlord is a website that lets renters leave reviews for properites they have rented.  The idea is similar to Yelp, except for rental properties instead of restaurants.
 
 Ever wondered any of the following while looking at potential places to move to?
