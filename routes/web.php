@@ -1,5 +1,8 @@
 <?php
 
+use \App\Review;
+use \App\Location;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -13,4 +16,18 @@
 
 Route::get('/', function () {
     return view('map');
+});
+
+Route::get('/location/{id}', function ($id) {
+    $reviews = Review::where('location_id', $id)->orderBy('created_at', 'desc')->get();
+    $location = Location::where('id', $id)->first();
+    $average_rating = 0;
+
+    foreach($reviews as $review) {
+      $average_rating += $review->rating;
+    }
+
+    $average_rating = $average_rating / sizeof($reviews);
+
+    return view('location', ['reviews' => $reviews, 'location' => $location, 'avg' => $average_rating]);
 });

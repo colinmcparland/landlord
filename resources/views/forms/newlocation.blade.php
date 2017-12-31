@@ -4,7 +4,7 @@
 
 @section('title', 'New Review')
 
-@section('content')
+@section('modal-content')
 <form id="newReviewForm">
   <div class="form-group">
     <label for="new-review-address">Street Address</label>

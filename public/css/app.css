@@ -8393,9 +8393,15 @@ body {
 .nav {
   position: absolute;
   z-index: 300;
-  width: 100%;
+  width: auto;
   height: auto;
   top: 0;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
 }
 
 .menu {
@@ -8462,6 +8468,9 @@ body {
 
 #searchform {
   position: relative;
+  display: inline-block;
+  width: 100%;
+  float: left;
 }
 
 .search-bar {
@@ -8506,5 +8515,36 @@ body {
 
 .gm-style-iw {
   width: 350px !important;
+}
+
+/*  Single location styles  */
+
+.preview-map {
+  width: 100%;
+  height: 200px;
+  display: block;
+}
+
+.reviews-container {
+  padding: 1px 7%;
+}
+
+.single-review {
+  padding: 25px 0;
+  border-top: 1px solid #ccc;
+}
+
+.single-review:last-child {
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 25px;
+}
+
+.breadcrumb {
+  padding-left: 7%;
+  padding-right: 7%;
+}
+
+.avg-rating {
+  margin-bottom: 25px;
 }
 

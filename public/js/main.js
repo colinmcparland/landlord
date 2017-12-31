@@ -769,33 +769,120 @@ var previewmap;
      */
     googleMapsLoader.KEY = googleMapsKey;
 
-    navigator.geolocation.getCurrentPosition(function (position) {
+    //  Init homepage map
+    if ($('.map').length) {
+      navigator.geolocation.getCurrentPosition(function (position) {
+        googleMapsLoader.load(function (google) {
+          var center = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
 
+          var options = {
+            center: center,
+            zoom: 13,
+            disableDefaultUI: true,
+            styles: [{ featureType: "road", elementType: "geometry", stylers: [{ lightness: 100 }, { visibility: "simplified" }] }, { "featureType": "water", "elementType": "geometry", "stylers": [{ "visibility": "on" }, { "color": "#C6E2FF" }] }, { "featureType": "poi", "elementType": "geometry.fill", "stylers": [{ "color": "#C5E3BF" }] }, { "featureType": "road", "elementType": "geometry.fill", "stylers": [{ "color": "#D1D1B8" }] }]
+          };
+
+          mainmap = new google.maps.Map(main_map_elem[0], options);
+
+          /**
+           * If we have a search query, populate the search bar and center the map
+           */
+
+          var urlargs = location.href.split('?');
+
+          if (urlargs.length > 1 && $('.map').length) {
+            urlargs = urlargs[1].split('=');
+            if (urlargs[0] == 'q') {
+              console.log(urlargs[1]);
+              $('.search-bar').val(urlargs[1].replace(new RegExp('\\+', 'g'), ' '));
+              $('.searchbutton').trigger('click');
+            }
+          }
+
+          $.when(getPins()).then(function (data, textstatus, promise) {
+            for (var i = 0; i < data.length; i++) {
+              addPin(data[i].location.coordinates, data[i].first_review, data[i].created_at, data[i].first_rating, data[i].location_id);
+            }
+          });
+        });
+      }, function (error) {
+
+        showAlert('warning', 'You have geolocation turned off, so we will start you off in Toronto.  You can browse to any city by using the search bar above.');
+
+        googleMapsLoader.load(function (google) {
+          var center = {
+            lat: 43.6532,
+            lng: -79.3832
+          };
+
+          var options = {
+            center: center,
+            zoom: 13,
+            disableDefaultUI: true,
+            styles: [{ featureType: "road", elementType: "geometry", stylers: [{ lightness: 100 }, { visibility: "simplified" }] }, { "featureType": "water", "elementType": "geometry", "stylers": [{ "visibility": "on" }, { "color": "#C6E2FF" }] }, { "featureType": "poi", "elementType": "geometry.fill", "stylers": [{ "color": "#C5E3BF" }] }, { "featureType": "road", "elementType": "geometry.fill", "stylers": [{ "color": "#D1D1B8" }] }]
+          };
+
+          mainmap = new google.maps.Map(main_map_elem[0], options);
+
+          /**
+           * If we have a search query, populate the search bar and center the map
+           */
+
+          var urlargs = location.href.split('?');
+
+          if (urlargs.length > 1 && $('.map').length) {
+            urlargs = urlargs[1].split('=');
+            if (urlargs[0] == 'q') {
+              console.log(urlargs[1]);
+              $('.search-bar').val(urlargs[1].replace(new RegExp('\\+', 'g'), ' '));
+              $('.searchbutton').trigger('click');
+            }
+          }
+
+          $.when(getPins()).then(function (data, textstatus, promise) {
+            for (var i = 0; i < data.length; i++) {
+              addPin(data[i].location.coordinates, data[i].first_review, data[i].created_at, data[i].first_rating, data[i].location_id);
+            }
+          });
+        });
+      });
+    }
+
+    //  Init locations page map
+
+    if ($('.preview-map').length) {
       googleMapsLoader.load(function (google) {
+        var addr = $('.addr').text().replace(new RegExp(' ', 'g'), '+');
 
-        //  Center the map and add markers
+        $.ajax({
+          type: 'GET',
+          url: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + addr + '&key=' + googleMapsKey,
+          success: function success(msg) {
+            var center = { lat: msg.results[0].geometry.location.lat, lng: msg.results[0].geometry.location.lng };
 
-        var center = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude
-        };
+            var options = {
+              center: center,
+              zoom: 15,
+              disableDefaultUI: true,
+              styles: [{ featureType: "road", elementType: "geometry", stylers: [{ lightness: 100 }, { visibility: "simplified" }] }, { "featureType": "water", "elementType": "geometry", "stylers": [{ "visibility": "on" }, { "color": "#C6E2FF" }] }, { "featureType": "poi", "elementType": "geometry.fill", "stylers": [{ "color": "#C5E3BF" }] }, { "featureType": "road", "elementType": "geometry.fill", "stylers": [{ "color": "#D1D1B8" }] }],
+              gestureHandling: 'none',
+              zoomControl: false
+            };
 
-        var options = {
-          center: center,
-          zoom: 13,
-          disableDefaultUI: true,
-          styles: [{ featureType: "road", elementType: "geometry", stylers: [{ lightness: 100 }, { visibility: "simplified" }] }, { "featureType": "water", "elementType": "geometry", "stylers": [{ "visibility": "on" }, { "color": "#C6E2FF" }] }, { "featureType": "poi", "elementType": "geometry.fill", "stylers": [{ "color": "#C5E3BF" }] }, { "featureType": "road", "elementType": "geometry.fill", "stylers": [{ "color": "#D1D1B8" }] }]
-        };
+            previewmap = new google.maps.Map(preview_map_elem[0], options);
 
-        mainmap = new google.maps.Map(main_map_elem[0], options);
+            var marker = new google.maps.Marker({
+              position: center
+            });
 
-        $.when(getPins()).then(function (data, textstatus, promise) {
-          for (var i = 0; i < data.length; i++) {
-            addPin(data[i].location.coordinates, data[i].first_review, data[i].created_at, data[i].first_rating, data[i].location_id);
+            marker.setMap(previewmap);
           }
         });
       });
-    });
+    }
 
     /*
     End Google Maps config
@@ -819,7 +906,7 @@ var previewmap;
     }
 
     function addPin(raw_address, review, date, rating, location_id) {
-      address = raw_address.replace(' ', '+');
+      address = raw_address.replace(new RegExp(' ', 'g'), '+');
       $.ajax({
         type: 'GET',
         url: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + address + '&key=' + googleMapsKey,
@@ -925,8 +1012,9 @@ var previewmap;
             },
             success: function success(msg) {
               if (msg == 0) {
+                var link = location.origin + '/?q=' + addr.replace(new RegExp(' ', 'g'), '+').replace(new RegExp(',', 'g'), '');
                 $('#newReviewModal').modal('hide');
-                showAlert('success', 'Review successfully added!');
+                showAlert('success', 'Review successfully added!  <a href="' + link + '">Click here to refresh the map.</a>');
               }
             },
             error: function error(err) {
@@ -942,7 +1030,7 @@ var previewmap;
     /**
      * When a review star is clicked, populate the value of the hidden input and do an animation.
      */
-    $('.rating-star').click(function () {
+    $('.modal .rating-star').click(function () {
       var rating = $(this).index() + 1;
 
       $('#new-review-rating').val(rating);
@@ -964,11 +1052,22 @@ var previewmap;
 
     $('#searchform').submit(function (e) {
       e.preventDefault();
-      $('.searchbutton').trigger('click');
+
+      if ($('.single-location').length) {
+        location.href = location.origin + '/?q=' + $('.search-bar').val().replace(new RegExp(' ', 'g'), '+').replace(new RegExp(',', 'g'), '');
+      } else {
+        $('.searchbutton').trigger('click');
+      }
+
       return false;
     });
 
     $('.searchbutton').click(function () {
+
+      if ($('.single-location').length) {
+        location.href = location.origin + '/?q=' + $('.search-bar').val().replace(new RegExp(" ", "g"), '+').replace(new RegExp(',', "g"), '');
+      }
+
       var addr = $('.search-bar').val();
 
       if (addr == '') {
@@ -1006,7 +1105,7 @@ var previewmap;
         $('.alert').fadeOut(function () {
           $('.alert').remove();
         });
-      }, 5000);
+      }, 10000);
     }
 
     /**
@@ -1014,16 +1113,16 @@ var previewmap;
      */
     $('#new-review-address').keyup(function () {
       var addr = $(this).val();
-      var preview_map = $('.preview-map');
 
       // Validate map address and submit AJAX request
       var geocoder = new google.maps.Geocoder();
-      var dropdown = $('.location-dropdown');
+      var dropdown = $('.modal .location-dropdown');
       dropdown.empty();
 
       geocoder.geocode({
         'address': addr
       }, function (result, status) {
+        console.log(result);
         if (status === google.maps.GeocoderStatus.OK && result.length > 0) {
 
           dropdown.addClass('show');
@@ -1042,10 +1141,57 @@ var previewmap;
       }
     });
 
-    $('body').on('click', '.location-dropdown li', function () {
+    $('body').on('click', '.modal .location-dropdown li', function () {
       var val = $(this).text();
       $('#new-review-address').val(val);
       $('.location-dropdown').removeClass('show');
+    });
+
+    /**
+     * Predictive search for homepage
+     */
+
+    /**
+     * Functions for showing preview map when creating new review
+     */
+    $('.search-bar').keyup(function () {
+      var addr = $(this).val();
+
+      // Validate map address and submit AJAX request
+      var geocoder = new google.maps.Geocoder();
+      var dropdown = $('#searchform .location-dropdown');
+
+      dropdown.empty();
+
+      console.log(dropdown);
+
+      geocoder.geocode({
+        'address': addr
+      }, function (result, status) {
+        console.log(result);
+        if (status === google.maps.GeocoderStatus.OK && result.length > 0) {
+
+          dropdown.addClass('show');
+          for (var i = 0; i < result.length; i++) {
+            dropdown.prepend("<li>" + result[i].formatted_address + "</li>");
+          }
+        } else {
+          dropdown.removeClass('show');
+        }
+      });
+    });
+
+    $('.map, .single-location').click(function (e) {
+      if ($(e.target).attr('id') != 'new-review-address' && !$(e.target).is('li')) {
+        $('.location-dropdown').removeClass('show');
+      }
+    });
+
+    $('body').on('click', '#searchform .location-dropdown li', function () {
+      var val = $(this).text();
+      $('.search-bar').val(val);
+      $('.location-dropdown').removeClass('show');
+      $('.searchbutton').trigger('click');
     });
   }); //  End document ready
 })(jQuery);
