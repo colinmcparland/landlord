@@ -9,6 +9,7 @@
   <div class="form-group">
     <label for="new-review-address">Street Address</label>
     <input type="text" name="new-review-address" id="new-review-address" class="form-control" placeholder="123 Anywhere St, Exampleville, Canada" /> 
+    <ul class="dropdown-menu location-dropdown"></ul>
   </div>
   <div class="form-group">
     <label for="new-review-rating">Rating</label>

@@ -8358,9 +8358,31 @@ body {
   margin: 0;
 }
 
+/*  Modal styles  */
+
 .modal-title {
   display: inline-block;
 }
+
+#newReviewForm .form-group {
+  position: relative;
+}
+
+.location-dropdown {
+  padding: 0;
+  width: 100%;
+}
+
+.location-dropdown li {
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.location-dropdown li:hover {
+  background-color: #eee;
+}
+
+/*  Map and homepage styles  */
 
 .map {
   width: 100%;
@@ -8456,7 +8478,7 @@ body {
 
 .alert {
   position: absolute;
-  top: 15px;
+  bottom: 15px;
   width: 95%;
   z-index: 300;
   left: 0;

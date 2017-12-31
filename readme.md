@@ -10,7 +10,8 @@ Ever wondered any of the following while looking at potential places to move to?
 If you answered yes, then this site is for you.  Visit today at [landlord.tinybird.ca](https://landlord.tinybird.ca)
 
 ### Todo
-* Show aggregate ratings, header, see more links to review info boxes
+* Add aggregate rating to review info boxes
 * Implement all reviews page
-* Show map address confirmation when creating new review
-* Style it up baby
+* Style it up baby with the cool new logo
+* Footer and the like
+* Google analytics

@@ -755,9 +755,11 @@ module.exports = __webpack_require__(36);
 
 __webpack_require__(9);
 var googleMapsLoader = __webpack_require__(35);
-var map_elem = document.getElementsByClassName('map');
+var main_map_elem = document.getElementsByClassName('map');
+var preview_map_elem = document.getElementsByClassName('preview-map');
 var googleMapsKey = "AIzaSyDn9LPfEgLCJ0Rwn1nSDdNr-YTQlvuDML0";
 var mainmap;
+var previewmap;
 
 (function ($) {
   $(document).ready(function () {
@@ -785,7 +787,7 @@ var mainmap;
           styles: [{ featureType: "road", elementType: "geometry", stylers: [{ lightness: 100 }, { visibility: "simplified" }] }, { "featureType": "water", "elementType": "geometry", "stylers": [{ "visibility": "on" }, { "color": "#C6E2FF" }] }, { "featureType": "poi", "elementType": "geometry.fill", "stylers": [{ "color": "#C5E3BF" }] }, { "featureType": "road", "elementType": "geometry.fill", "stylers": [{ "color": "#D1D1B8" }] }]
         };
 
-        mainmap = new google.maps.Map(map_elem[0], options);
+        mainmap = new google.maps.Map(main_map_elem[0], options);
 
         $.when(getPins()).then(function (data, textstatus, promise) {
           for (var i = 0; i < data.length; i++) {
@@ -839,8 +841,6 @@ var mainmap;
           }
 
           rating_stars += "</div>";
-
-          console.log(rating_stars);
 
           var content = '\
             <h4>Recent Reviews for ' + raw_address.split(',')[0] + '</h4>\
@@ -1008,6 +1008,45 @@ var mainmap;
         });
       }, 5000);
     }
+
+    /**
+     * Functions for showing preview map when creating new review
+     */
+    $('#new-review-address').keyup(function () {
+      var addr = $(this).val();
+      var preview_map = $('.preview-map');
+
+      // Validate map address and submit AJAX request
+      var geocoder = new google.maps.Geocoder();
+      var dropdown = $('.location-dropdown');
+      dropdown.empty();
+
+      geocoder.geocode({
+        'address': addr
+      }, function (result, status) {
+        if (status === google.maps.GeocoderStatus.OK && result.length > 0) {
+
+          dropdown.addClass('show');
+          for (var i = 0; i < result.length; i++) {
+            dropdown.prepend("<li>" + result[i].formatted_address + "</li>");
+          }
+        } else {
+          dropdown.removeClass('show');
+        }
+      });
+    });
+
+    $('.modal').click(function (e) {
+      if ($(e.target).attr('id') != 'new-review-address' && !$(e.target).is('li')) {
+        $('.location-dropdown').removeClass('show');
+      }
+    });
+
+    $('body').on('click', '.location-dropdown li', function () {
+      var val = $(this).text();
+      $('#new-review-address').val(val);
+      $('.location-dropdown').removeClass('show');
+    });
   }); //  End document ready
 })(jQuery);
 
