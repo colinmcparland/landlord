@@ -8358,6 +8358,10 @@ body {
   margin: 0;
 }
 
+.modal-title {
+  display: inline-block;
+}
+
 .map {
   width: 100%;
   height: 100vh;
@@ -8370,11 +8374,63 @@ body {
   width: 100%;
   height: auto;
   top: 0;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
 }
 
 .menu {
   margin: 15px;
   float: right;
   display: inline-block;
+}
+
+.search {
+  width: 100%;
+  margin: 0 15px;
+}
+
+#searchbutton {
+  cursor: pointer;
+}
+
+#searchbutton:hover {
+  -webkit-filter: brightness(80%);
+          filter: brightness(80%);
+}
+
+.search-bar {
+  width: 100%;
+  padding: 6px;
+  outline: none !important;
+  display: inline-block;
+  float: left;
+}
+
+.alert {
+  position: absolute;
+  top: 15px;
+  width: 95%;
+  z-index: 300;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.rating-container {
+  display: block;
+}
+
+.rating-star {
+  font-size: 30px;
+  cursor: pointer;
+}
+
+.glyphicon-star {
+  color: #c5b358;
 }
 

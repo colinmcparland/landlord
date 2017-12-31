@@ -787,7 +787,6 @@ var mainmap;
         mainmap = new google.maps.Map(map_elem[0], options);
 
         $.when(getPins()).then(function (data, textstatus, promise) {
-          console.log(data);
           for (var i = 0; i < data.length; i++) {
             addPin(data[i].location.coordinates, data[i].first_review, data[i].created_at);
           }
@@ -826,8 +825,6 @@ var mainmap;
           var long = msg.results[0].geometry.location.lng;
           var latlong = { lat: lat, lng: long };
 
-          console.log(latlong);
-
           var marker = new google.maps.Marker({
             position: latlong,
             title: msg.results[0].formatted_address
@@ -844,15 +841,13 @@ var mainmap;
           });
 
           marker.setMap(mainmap);
-
-          console.log(marker);
         },
         error: function error(err) {}
       });
     }
 
     /**
-     * Form submits etc..
+     * New review submit actions
      */
     $('#newReviewModal .action-btn').click(function () {
       $('#newReviewForm .err-text').remove();
@@ -878,7 +873,7 @@ var mainmap;
       geocoder.geocode({
         'address': addr
       }, function (result, status) {
-        console.log(status);
+
         if (status === google.maps.GeocoderStatus.OK && result.length > 0) {
           addr = result[0].formatted_address;
 
@@ -906,13 +901,69 @@ var mainmap;
       });
     });
 
+    /**
+     * When a review star is clicked, populate the value of the hidden input and do an animation.
+     */
+    $('.rating-star').click(function () {
+      var rating = $(this).index() + 1;
+
+      $('#new-review-rating').val(rating);
+
+      if ($(this).hasClass('glyphicon-star-empty')) {
+        for (var i = 0; i <= rating; i++) {
+          $('.rating-star:nth-child(' + i + '):not(.glyphicon-star)').toggleClass('glyphicon-star-empty glyphicon-star');
+        }
+      } else {
+        for (var i = 5; i > rating; i--) {
+          $('.rating-star:nth-child(' + i + '):not(.glyphicon-star-empty)').toggleClass('glyphicon-star glyphicon-star-empty');
+        }
+      }
+    });
+
+    /**
+     * When the search button is clicked, center the map at the location.
+     */
+
+    $('#searchform').submit(function (e) {
+      e.preventDefault();
+      $('#searchbutton').trigger('click');
+      return false;
+    });
+
+    $('#searchbutton').click(function () {
+      var addr = $('.search-bar').val();
+
+      if (addr == '') {
+        return false;
+      } else {
+        $.ajax({
+          type: 'GET',
+          url: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + addr + '&key=' + googleMapsKey,
+          success: function success(msg) {
+            var lat = msg.results[0].geometry.location.lat;
+            var long = msg.results[0].geometry.location.lng;
+            var latLng = new google.maps.LatLng(lat, long);
+            mainmap.setCenter(latLng);
+            mainmap.setZoom(13);
+          },
+          error: function error(err) {
+            console.log(err);
+          }
+        });
+      }
+    });
+
+    /**
+     * General form utility functions
+     */
+
     function showError(target, msg) {
       var errmsg = '<small style="color: red;" class="form-text text-muted err-text">' + msg + '</small>';
       $(errmsg).insertAfter($(target));
     }
 
     function showAlert(type, msg) {
-      var alert = '<div style="position: absolute; top: 15px; width: 95%; z-index: 300; left: 0; right: 0; margin: 0 auto; text-align: center;" class="alert alert-' + type + '" role="alert">' + msg + '</div>';
+      var alert = '<div class="alert alert-' + type + '" role="alert">' + msg + '</div>';
       $('body').prepend(alert);
       setTimeout(function () {
         $('.alert').fadeOut(function () {
