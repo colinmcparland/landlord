@@ -18,3 +18,5 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::post('/review/add', 'ReviewController@addReview');
+
+Route::get('/location', 'LocationController@getAllLocations');

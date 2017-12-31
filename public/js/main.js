@@ -757,6 +757,7 @@ __webpack_require__(9);
 var googleMapsLoader = __webpack_require__(35);
 var map_elem = document.getElementsByClassName('map');
 var googleMapsKey = "AIzaSyDn9LPfEgLCJ0Rwn1nSDdNr-YTQlvuDML0";
+var mainmap;
 
 (function ($) {
   $(document).ready(function () {
@@ -770,6 +771,8 @@ var googleMapsKey = "AIzaSyDn9LPfEgLCJ0Rwn1nSDdNr-YTQlvuDML0";
 
       googleMapsLoader.load(function (google) {
 
+        //  Center the map and add markers
+
         var center = {
           lat: position.coords.latitude,
           lng: position.coords.longitude
@@ -781,20 +784,72 @@ var googleMapsKey = "AIzaSyDn9LPfEgLCJ0Rwn1nSDdNr-YTQlvuDML0";
           disableDefaultUI: true
         };
 
-        var map = new google.maps.Map(map_elem[0], options);
+        mainmap = new google.maps.Map(map_elem[0], options);
 
-        var marker_options = {
-          position: center,
-          map: map
-        };
-
-        var marker = new google.maps.Marker(marker_options);
+        $.when(getPins()).then(function (data, textstatus, promise) {
+          console.log(data);
+          for (var i = 0; i < data.length; i++) {
+            addPin(data[i].location.coordinates, data[i].first_review, data[i].created_at);
+          }
+        });
       });
     });
 
     /*
     End Google Maps config
      */
+
+    /**
+     * Get all the pins and place them on the map.
+     */
+
+    function getPins() {
+      return $.ajax({
+        type: 'GET',
+        url: '/api/location',
+        success: function success(msg) {
+          return msg;
+        },
+        error: function error(err) {
+          console.log(err.responseJSON);
+        }
+      });
+    }
+
+    function addPin(address, review, date) {
+      address = address.replace(' ', '+');
+      $.ajax({
+        type: 'GET',
+        url: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + address + '&key=' + googleMapsKey,
+        success: function success(msg) {
+          var lat = msg.results[0].geometry.location.lat;
+          var long = msg.results[0].geometry.location.lng;
+          var latlong = { lat: lat, lng: long };
+
+          console.log(latlong);
+
+          var marker = new google.maps.Marker({
+            position: latlong,
+            title: msg.results[0].formatted_address
+          });
+
+          var content = '<strong>Review on ' + date + '</strong><p>' + review + '</p>';
+
+          var infowindow = new google.maps.InfoWindow({
+            content: content
+          });
+
+          marker.addListener('click', function () {
+            infowindow.open(mainmap, marker);
+          });
+
+          marker.setMap(mainmap);
+
+          console.log(marker);
+        },
+        error: function error(err) {}
+      });
+    }
 
     /**
      * Form submits etc..
@@ -809,10 +864,10 @@ var googleMapsKey = "AIzaSyDn9LPfEgLCJ0Rwn1nSDdNr-YTQlvuDML0";
 
       var addr = $(this).find('#new-review-address').val();
       var rating = $(this).find('#new-review-rating').val();
-      var review = $(this).find('#new-review-content').val();
+      var content = $(this).find('#new-review-content').val();
 
       //  Validate review
-      if (review.length == 0) {
+      if (content.length == 0) {
         showError('#new-review-content', 'You forgot to write your review!');
         return false;
       }
@@ -833,13 +888,16 @@ var googleMapsKey = "AIzaSyDn9LPfEgLCJ0Rwn1nSDdNr-YTQlvuDML0";
             data: {
               address: addr,
               rating: rating,
-              review: review
+              content: content
             },
             success: function success(msg) {
-              console.log(msg);
+              if (msg == 0) {
+                $('#newReviewModal').modal('hide');
+                showAlert('success', 'Review successfully added!');
+              }
             },
             error: function error(err) {
-              console.log(err);
+              console.log(err.responseJSON);
             }
           });
         } else {
@@ -849,9 +907,18 @@ var googleMapsKey = "AIzaSyDn9LPfEgLCJ0Rwn1nSDdNr-YTQlvuDML0";
     });
 
     function showError(target, msg) {
-      console.log(msg);
       var errmsg = '<small style="color: red;" class="form-text text-muted err-text">' + msg + '</small>';
       $(errmsg).insertAfter($(target));
+    }
+
+    function showAlert(type, msg) {
+      var alert = '<div style="position: absolute; top: 15px; width: 95%; z-index: 300; left: 0; right: 0; margin: 0 auto; text-align: center;" class="alert alert-' + type + '" role="alert">' + msg + '</div>';
+      $('body').prepend(alert);
+      setTimeout(function () {
+        $('.alert').fadeOut(function () {
+          $('.alert').remove();
+        });
+      }, 5000);
     }
   }); //  End document ready
 })(jQuery);
