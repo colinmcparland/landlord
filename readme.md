@@ -8,3 +8,9 @@ Ever wondered any of the following while looking at potential places to move to?
 * Are the neighbours cool?
 
 If you answered yes to any of the above, then this site is for you.  Visit today at [landlord.tinybird.ca](https://landlord.tinybird.ca)
+
+### Todo
+* Show aggregate ratings, header, see more links to review info boxes
+* Implement all reviews page
+* Show map address confirmation when creating new review
+* Style it up baby
