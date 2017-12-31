@@ -26,7 +26,8 @@ var mainmap;
         var options = {
           center: center,
           zoom: 13,
-          disableDefaultUI: true
+          disableDefaultUI: true,
+          styles: [{featureType:"road",elementType:"geometry",stylers:[{lightness:100},{visibility:"simplified"}]},{"featureType":"water","elementType":"geometry","stylers":[{"visibility":"on"},{"color":"#C6E2FF",}]},{"featureType":"poi","elementType":"geometry.fill","stylers":[{"color":"#C5E3BF"}]},{"featureType":"road","elementType":"geometry.fill","stylers":[{"color":"#D1D1B8"}]}]
         }
 
         mainmap = new google.maps.Map(map_elem[0], options);
@@ -34,7 +35,7 @@ var mainmap;
         $.when(getPins())
           .then(function(data, textstatus, promise) {
             for(var i = 0; i < data.length; i++) {
-              addPin(data[i].location.coordinates, data[i].first_review, data[i].created_at);
+              addPin(data[i].location.coordinates, data[i].first_review, data[i].created_at, data[i].first_rating, data[i].location_id);
             }
           })
 
@@ -64,8 +65,8 @@ var mainmap;
         });
     }
 
-    function addPin(address, review, date) {
-      address = address.replace(' ', '+');
+    function addPin(raw_address, review, date, rating, location_id) {
+      address = raw_address.replace(' ', '+');
       $.ajax({
         type: 'GET',
         url: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + address + '&key=' + googleMapsKey,
@@ -79,7 +80,23 @@ var mainmap;
             title: msg.results[0].formatted_address
           });
 
-          var content = '<strong>Review on ' + date + '</strong><p>' + review + '</p>';
+          var rating_stars = '<div class="rating-container">';
+
+          //  calculate rating
+          for(var i = 0; i < rating; i++) {
+            rating_stars += '<span class="glyphicon glyphicon-star rating-star"></span>';
+          }
+
+          rating_stars += "</div>";
+
+          console.log(rating_stars);
+
+          var content = '\
+            <h4>Recent Reviews for ' + raw_address.split(',')[0] + '</h4>\
+            <p><strong>Review on ' + date + '</strong></p>\
+            <p>' + review + '</p>\
+            '+ rating_stars + '\
+            <a class="btn btn-default" role="button" href="/location/' + location_id + '" style="font-size: 12px; margin-top: 12px;">See More Reviews</a>';
 
           var infowindow = new google.maps.InfoWindow({
             content: content
@@ -96,6 +113,28 @@ var mainmap;
         }
       })
     }
+
+
+    /**
+     * UI animations for the new form button
+     */
+    $('.menu').mouseenter(function()  {
+      $(this).stop();
+      $(this).animate({
+        width: '150px',
+      }, 200, function() {
+        $(this).append('<small>New Review</small>');
+      });
+    });
+
+    $('.menu').mouseleave(function()  {
+      $(this).find('small').remove();
+      $(this).animate({
+        width: '48px',
+      }, 100, function() {
+        $(this).find('small').remove();
+      });
+    });
 
 
     /**
@@ -184,11 +223,11 @@ var mainmap;
     
     $('#searchform').submit(function(e) {
       e.preventDefault();
-      $('#searchbutton').trigger('click');
+      $('.searchbutton').trigger('click');
       return false;
     })
     
-    $('#searchbutton').click(function() {
+    $('.searchbutton').click(function() {
       var addr = $('.search-bar').val();
 
       if(addr == '') {
@@ -202,7 +241,6 @@ var mainmap;
             var long = msg.results[0].geometry.location.lng;
             var latLng = new google.maps.LatLng(lat, long);
             mainmap.setCenter(latLng);
-            mainmap.setZoom(13);
           },
           error: function(err) {
             console.log(err);

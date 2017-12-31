@@ -9,20 +9,18 @@
 </head>
 <body>
   <div class="nav">
-    <div class="logo"></div>
     <div class="search">
       <form id="searchform">
-        <div class="input-group">
-            <input type="text" class="form-control search-bar" aria-describedby="searchbutton" />
-            <span class="input-group-addon" id="searchbutton"><span class='glyphicon glyphicon-search'></span> Search Address</span>
-        </div>
+        <input type="text" placeholder="Search Landlord Reviews by Address" class="form-control search-bar" aria-describedby="searchbutton" />
+        <span class="glyphicon glyphicon-search searchbutton"></span>
       </form>
     </div>
     <button type="button" class="menu btn btn-primary" data-toggle="modal" data-target="#newReviewModal">
-      + Add a Review
+      +
     </button>
   </div>
   <div class="map"></div>
   @include('forms.newlocation')
+  <div class="logo">LAND<br />LORD<br /><small>beta</small></div>
 </body>
 </html>

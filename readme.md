@@ -7,7 +7,7 @@ Ever wondered any of the following while looking at potential places to move to?
 * Is the place susceptible to mold?
 * Are the neighbours cool?
 
-If you answered yes to any of the above, then this site is for you.  Visit today at [landlord.tinybird.ca](https://landlord.tinybird.ca)
+If you answered yes, then this site is for you.  Visit today at [landlord.tinybird.ca](https://landlord.tinybird.ca)
 
 ### Todo
 * Show aggregate ratings, header, see more links to review info boxes

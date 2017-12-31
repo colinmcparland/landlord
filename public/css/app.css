@@ -1,4 +1,4 @@
-@import url(https://fonts.googleapis.com/css?family=Raleway:300,400,600);@charset "UTF-8";
+@import url(https://fonts.googleapis.com/css?family=Roboto:300,400,600);@charset "UTF-8";
 
 /*!
  * Bootstrap v3.3.7 (http://getbootstrap.com)
@@ -1402,7 +1402,7 @@ html {
 }
 
 body {
-  font-family: "Raleway", sans-serif;
+  font-family: "Roboto", sans-serif;
   font-size: 14px;
   line-height: 1.6;
   color: #636b6f;
@@ -7499,7 +7499,7 @@ button.close {
   position: absolute;
   z-index: 1070;
   display: block;
-  font-family: "Raleway", sans-serif;
+  font-family: "Roboto", sans-serif;
   font-style: normal;
   font-weight: normal;
   letter-spacing: normal;
@@ -7633,7 +7633,7 @@ button.close {
   display: none;
   max-width: 276px;
   padding: 1px;
-  font-family: "Raleway", sans-serif;
+  font-family: "Roboto", sans-serif;
   font-style: normal;
   font-weight: normal;
   letter-spacing: normal;
@@ -8374,40 +8374,84 @@ body {
   width: 100%;
   height: auto;
   top: 0;
+}
+
+.menu {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
+  margin: 0 15px;
+  padding: 0 12px;
+  float: left;
+  border-radius: 50vh;
+  width: 48px;
+  height: 48px;
+  line-height: 1;
+  font-size: 35px;
+  font-weight: 300;
+  outline: none !important;
+  text-align: left;
+  -webkit-box-shadow: 0px 1px 3px #ccc;
+          box-shadow: 0px 1px 3px #ccc;
 }
 
-.menu {
+.menu small {
+  font-size: 14px;
+  padding-left: 15px;
+}
+
+.logo {
   margin: 15px;
-  float: right;
-  display: inline-block;
+  text-align: center;
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: 10px;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.logo small {
+  color: #fff;
+  font-weight: 300;
+  display: block;
 }
 
 .search {
-  width: 100%;
-  margin: 0 15px;
+  width: 450px;
+  margin: 15px;
 }
 
-#searchbutton {
+.search .glyphicon {
+  position: absolute;
+  right: 15px;
+  top: 15px;
+  font-size: 20px;
+  opacity: 0.5;
   cursor: pointer;
 }
 
-#searchbutton:hover {
-  -webkit-filter: brightness(80%);
-          filter: brightness(80%);
+.search .glyphicon:hover {
+  opacity: 1;
+}
+
+#searchform {
+  position: relative;
 }
 
 .search-bar {
+  -webkit-box-shadow: 0px 1px 3px #ccc;
+          box-shadow: 0px 1px 3px #ccc;
   width: 100%;
-  padding: 6px;
+  padding: 12px 20px;
   outline: none !important;
   display: inline-block;
   float: left;
+  height: auto;
+  border-radius: 0;
 }
 
 .alert {
@@ -8426,11 +8470,19 @@ body {
 }
 
 .rating-star {
+  font-size: 14px;
+}
+
+.modal .rating-star {
   font-size: 30px;
   cursor: pointer;
 }
 
 .glyphicon-star {
   color: #c5b358;
+}
+
+.gm-style-iw {
+  width: 350px !important;
 }
 
