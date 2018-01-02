@@ -5,6 +5,7 @@ var preview_map_elem = document.getElementsByClassName('preview-map');
 var googleMapsKey = process.env.MIX_GMAPS_KEY;
 var mainmap;
 var previewmap;
+var markers = [];
 
 (function($) {
   $(document).ready(function()  {
@@ -42,7 +43,6 @@ var previewmap;
           if(urlargs.length > 1 && $('.map').length) {
             urlargs = urlargs[1].split('=');
             if(urlargs[0] =='q') {
-              console.log(urlargs[1]);
               $('.search-bar').val(urlargs[1].replace(new RegExp('\\+', 'g'), ' ')); 
               $('.searchbutton').trigger('click');
             }
@@ -50,9 +50,7 @@ var previewmap;
 
           $.when(getPins())
             .then(function(data, textstatus, promise) {
-              for(var i = 0; i < data.length; i++) {
-                addPin(data[i].location.coordinates, data[i].first_review, data[i].created_at, data[i].first_rating, data[i].location_id);
-              }
+              addPins(data);
             })
         });
       }, function(error) {
@@ -83,7 +81,6 @@ var previewmap;
           if(urlargs.length > 1 && $('.map').length) {
             urlargs = urlargs[1].split('=');
             if(urlargs[0] =='q') {
-              console.log(urlargs[1]);
               $('.search-bar').val(urlargs[1].replace(new RegExp('\\+', 'g'), ' ')); 
               $('.searchbutton').trigger('click');
             }
@@ -91,9 +88,7 @@ var previewmap;
 
           $.when(getPins())
             .then(function(data, textstatus, promise) {
-              for(var i = 0; i < data.length; i++) {
-                addPin(data[i].location.coordinates, data[i].first_review, data[i].created_at, data[i].first_rating, data[i].location_id);
-              }
+              addPins(data);
             })
         });
       })
@@ -105,30 +100,26 @@ var previewmap;
       googleMapsLoader.load(function(google) {
         var addr = $('.addr').text().replace(new RegExp(' ', 'g'), '+');
 
-        $.ajax({
-          type: 'GET',
-          url: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + addr + '&key=' + googleMapsKey,
-          success: function(msg) {
-            var center = {lat: msg.results[0].geometry.location.lat, lng: msg.results[0].geometry.location.lng};
+        getLatLong(addr).then(function(msg) {
+          var center = {lat: msg.results[0].geometry.location.lat, lng: msg.results[0].geometry.location.lng};
 
-            var options = {
-              center: center,
-              zoom: 15,
-              disableDefaultUI: true,
-              styles: [{featureType:"road",elementType:"geometry",stylers:[{lightness:100},{visibility:"simplified"}]},{"featureType":"water","elementType":"geometry","stylers":[{"visibility":"on"},{"color":"#C6E2FF",}]},{"featureType":"poi","elementType":"geometry.fill","stylers":[{"color":"#C5E3BF"}]},{"featureType":"road","elementType":"geometry.fill","stylers":[{"color":"#D1D1B8"}]}],
-              gestureHandling: 'none',
-              zoomControl: false
-            }
-
-            previewmap = new google.maps.Map(preview_map_elem[0], options);
-
-            var marker = new google.maps.Marker({
-              position: center
-            });
-
-            marker.setMap(previewmap);
+          var options = {
+            center: center,
+            zoom: 15,
+            disableDefaultUI: true,
+            styles: [{featureType:"road",elementType:"geometry",stylers:[{lightness:100},{visibility:"simplified"}]},{"featureType":"water","elementType":"geometry","stylers":[{"visibility":"on"},{"color":"#C6E2FF",}]},{"featureType":"poi","elementType":"geometry.fill","stylers":[{"color":"#C5E3BF"}]},{"featureType":"road","elementType":"geometry.fill","stylers":[{"color":"#D1D1B8"}]}],
+            gestureHandling: 'none',
+            zoomControl: false
           }
-        });
+
+          previewmap = new google.maps.Map(preview_map_elem[0], options);
+
+          var marker = new google.maps.Marker({
+            position: center
+          });
+
+          marker.setMap(previewmap);
+        })
       })
     }
 
@@ -155,19 +146,53 @@ var previewmap;
       });
     }
 
-    function addPin(raw_address, review, date, rating, location_id) {
-      address = raw_address.replace(new RegExp(' ', 'g'), '+');
+    function getLatLong(address, data = null) {
+      var deferred = $.Deferred();
+
       $.ajax({
         type: 'GET',
         url: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + address + '&key=' + googleMapsKey,
         success: function(msg) {
-          var lat = msg.results[0].geometry.location.lat;
-          var long = msg.results[0].geometry.location.lng;
-          var latlong = {lat: lat, lng: long};
+          console
+          deferred.resolve(msg, data);
+        },
+        error: function(err) {
+          deferred.reject(err);
+        } 
+      })
+
+      return deferred.promise();
+    }
+
+    function addPins(data, openif = null) {
+
+      var address;
+      var raw_address;
+      var review;
+      var date;
+      var rating ;
+      var location_id;
+
+      for(var i = 0; i < data.length; i++) {
+        raw_address = data[i].location.coordinates;
+        address = raw_address.replace(new RegExp(' ', 'g'), '+');
+
+        getLatLong(address, data[i]).then(function(value, curr_data) {
+
+          raw_address = curr_data.location.coordinates;
+          review = curr_data.first_review;
+          date = curr_data.created_at; 
+          rating = curr_data.first_rating;
+          location_id = curr_data.location_id;
+          address = raw_address.replace(new RegExp(' ', 'g'), '+');
+
+          var latlong = {lat: value.results[0].geometry.location.lat, lng: value.results[0].geometry.location.lng};
+
+          console.log(latlong);
 
           var marker = new google.maps.Marker({
             position: latlong,
-            title: msg.results[0].formatted_address
+            title: value.results[0].formatted_address
           });
 
           var rating_stars = '<div class="rating-container">';
@@ -194,12 +219,18 @@ var previewmap;
             infowindow.open(mainmap, marker);
           });
 
-          marker.setMap(mainmap);
-        },
-        error: function(err) {
+          markers.push(marker);
 
-        }
-      })
+          marker.setMap(mainmap);
+
+          if(openif == value.results[0].formatted_address) {
+            new google.maps.event.trigger(marker, 'click');
+            mainmap.setCenter(latlong);
+            mainmap.setZoom(15);
+          }
+        })
+      } 
+
     }
 
 
@@ -267,9 +298,28 @@ var previewmap;
             },
             success: function(msg) {
               if(msg == 0) {
-                var link = location.origin + '/?q=' + addr.replace(new RegExp(' ', 'g'), '+').replace(new RegExp(',', 'g'), '');
-                $('#newReviewModal').modal('hide');
-                showAlert('success', 'Review successfully added!  <a href="' + link + '">Click here to refresh the map.</a>');
+
+                if($('.single-location').length) {
+                  $('#newReviewModal').modal('hide');
+                  showAlert('success', 'Review successfully added!');
+                } else {
+                  for(var i = 0; i<markers.length; i++) {
+                    markers[i].setMap(null);
+                  }
+
+                  $.when(getPins())
+                    .then(function(data, textstatus, promise) {
+
+                      //  Empty the marker array
+                      markers = [];
+
+                      addPins(data, addr);
+
+                      $('#newReviewModal').modal('hide');
+
+                      showAlert('success', 'Review successfully added!');
+                  })
+                }
               }
             },
             error: function(err) {
@@ -332,19 +382,13 @@ var previewmap;
       if(addr == '') {
         return false;
       } else {
-        $.ajax({
-          type: 'GET',
-          url: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + addr + '&key=' + googleMapsKey,
-          success: function(msg) {
-            var lat = msg.results[0].geometry.location.lat;
-            var long = msg.results[0].geometry.location.lng;
-            var latLng = new google.maps.LatLng(lat, long);
-            mainmap.setCenter(latLng);
-          },
-          error: function(err) {
-            console.log(err);
-          }
-        }) 
+        getLatLong(addr).then(function(msg) {
+          var lat = msg.results[0].geometry.location.lat;
+          var long = msg.results[0].geometry.location.lng;
+          var latLng = new google.maps.LatLng(lat, long);
+          mainmap.setCenter(latLng);
+          mainmap.setZoom(15);
+        })
       }
     })
 
@@ -382,7 +426,6 @@ var previewmap;
       geocoder.geocode({
         'address': addr
       }, function(result, status) {
-        console.log(result);
         if(status === google.maps.GeocoderStatus.OK && result.length > 0) {
 
           dropdown.addClass('show');
@@ -423,12 +466,10 @@ var previewmap;
 
       dropdown.empty();
 
-      console.log(dropdown);
-
       geocoder.geocode({
         'address': addr
       }, function(result, status) {
-        console.log(result);
+
         if(status === google.maps.GeocoderStatus.OK && result.length > 0) {
 
           dropdown.addClass('show');

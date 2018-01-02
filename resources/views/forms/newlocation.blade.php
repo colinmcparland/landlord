@@ -2,7 +2,7 @@
 
 @section('id', 'newReviewModal')
 
-@section('title', 'New Review')
+@section('modal-title', 'New Review')
 
 @section('modal-content')
 <form id="newReviewForm">
