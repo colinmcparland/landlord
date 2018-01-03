@@ -757,18 +757,58 @@ __webpack_require__(9);
 var googleMapsLoader = __webpack_require__(35);
 var main_map_elem = document.getElementsByClassName('map');
 var preview_map_elem = document.getElementsByClassName('preview-map');
+var placeholder_map_elem = document.getElementsByClassName('placeholder-map');
 var googleMapsKey = "AIzaSyDn9LPfEgLCJ0Rwn1nSDdNr-YTQlvuDML0";
 googleMapsLoader.KEY = googleMapsKey;
+/*
+TODO:  Convert these to objects so they can be passed as pointers into functions
+ */
 var mainmap;
 var previewmap;
+var placeholdermap;
 var markers = [];
 
-/**
- * Function to add pins to a map
- * @param {Array}   data     Array of marker objects we're to add to the map
- * @param {boolean} openif   If this bit is set, then present the marker open & center to it
- */
-function addPins(data, map) {
+//  Cities to randomly go to on placeholder map
+var cities = {
+  edmonton: {
+    lat: 53.5444,
+    lng: -113.490
+  },
+  toronto: {
+    lat: 43.6532,
+    lng: -79.3832
+  },
+  montreal: {
+    lat: 45.5017,
+    lng: -73.5673
+  },
+  vancouver: {
+    lat: 49.2827,
+    lng: -123.1207
+  },
+  halifax: {
+    lat: 44.6488,
+    lng: -63.5752
+  },
+  calgary: {
+    lat: 51.0486,
+    lng: -114.0708
+  },
+  winnipeg: {
+    lat: 49.8951,
+    lng: -97.1384
+  },
+  saskatoon: {
+    lat: 52.1332,
+    lng: -106.6700
+  }
+
+  /**
+   * Function to add pins to a map
+   * @param {Array}   data     Array of marker objects we're to add to the map
+   * @param {boolean} openif   If this bit is set, then present the marker open & center to it
+   */
+};function addPins(data, map) {
   var openif = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
 
 
@@ -805,18 +845,21 @@ function addPins(data, map) {
         title: value.results[0].formatted_address
       });
 
-      var infowindow = makeInfoWindow(rating, raw_address, date, review, location_id);
-
-      marker.addListener('click', function () {
-        infowindow.open(mainmap, marker);
-      });
+      if (map == 'mainmap') {
+        var infowindow = makeInfoWindow(rating, raw_address, date, review, location_id);
+        marker.addListener('click', function () {
+          infowindow.open(mainmap, marker);
+        });
+      }
 
       markers.push(marker);
 
       if (map == 'mainmap') {
         marker.setMap(mainmap);
-      } else {
+      } else if (map == 'previewmap') {
         marker.setMap(previewmap);
+      } else if (map == 'placeholdermap') {
+        marker.setMap(placeholdermap);
       }
 
       if (openif == value.results[0].formatted_address) {
@@ -837,6 +880,9 @@ function addPins(data, map) {
  * @return {null}        
  */
 function buildMap(map, elem, center, zoom) {
+  var pancontrol = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 'cooperative';
+  var zoomcontrol = arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : true;
+
 
   /*
   Set the options for the map we're going to intialize
@@ -846,7 +892,9 @@ function buildMap(map, elem, center, zoom) {
     center: center,
     zoom: zoom,
     disableDefaultUI: true,
-    styles: [{ featureType: "road", elementType: "geometry", stylers: [{ lightness: 100 }, { visibility: "simplified" }] }, { "featureType": "water", "elementType": "geometry", "stylers": [{ "visibility": "on" }, { "color": "#C6E2FF" }] }, { "featureType": "poi", "elementType": "geometry.fill", "stylers": [{ "color": "#C5E3BF" }] }, { "featureType": "road", "elementType": "geometry.fill", "stylers": [{ "color": "#D1D1B8" }] }]
+    styles: [{ featureType: "road", elementType: "geometry", stylers: [{ lightness: 100 }, { visibility: "simplified" }] }, { "featureType": "water", "elementType": "geometry", "stylers": [{ "visibility": "on" }, { "color": "#C6E2FF" }] }, { "featureType": "poi", "elementType": "geometry.fill", "stylers": [{ "color": "#C5E3BF" }] }, { "featureType": "road", "elementType": "geometry.fill", "stylers": [{ "color": "#D1D1B8" }] }],
+    gestureHandling: pancontrol,
+    zoomControl: zoomcontrol
 
     /*
     Initialize the map
@@ -857,8 +905,10 @@ function buildMap(map, elem, center, zoom) {
     //  Theres gotta be a better way to do this...
     if (map == 'mainmap') {
       mainmap = new google.maps.Map(elem, options);
-    } else {
+    } else if (map == 'previewmap') {
       previewmap = new google.maps.Map(elem, options);
+    } else if (map == 'placeholdermap') {
+      placeholdermap = new google.maps.Map(elem, options);
     }
 
     /*
@@ -1002,8 +1052,23 @@ function getURLArgs() {
           lng: msg.results[0].geometry.location.lng
         };
 
-        buildMap('previewmap', preview_map_elem[0], center, 15);
+        buildMap('previewmap', preview_map_elem[0], center, 15, 'none', false);
       });
+    }
+
+    //  Init blurred placeholder map
+    if ($('.placeholder-map').length) {
+
+      var center;
+      var cities_arr = Object.values(cities);
+
+      var rand = Math.floor(Math.random() * Object.keys(cities).length);
+
+      center = cities_arr[rand];
+
+      console.log(cities_arr[rand]);
+
+      buildMap('placeholdermap', placeholder_map_elem[0], center, 13, 'none', false);
     }
 
     /**
@@ -1041,11 +1106,24 @@ function getURLArgs() {
       var addr = $(this).find('#new-review-address').val();
       var rating = $(this).find('#new-review-rating').val();
       var content = $(this).find('#new-review-content').val();
+      var email = $(this).find('#new-review-email').val();
+
+      var err = false;
+
+      if (email.length == 0) {
+        showError('#new-review-email', 'Please enter your email address.');
+        err = true;
+      }
 
       //  Validate review
       if (content.length == 0) {
-        showError('#new-review-content', 'You forgot to write your review!');
-        return false;
+        showError('#new-review-content', 'Please write something for your review.');
+        err = true;
+      }
+
+      if (rating == 0) {
+        showError('.rating-container', 'Please give a rating out of 5.');
+        err = true;
       }
 
       // Validate map address and submit AJAX request
@@ -1055,7 +1133,10 @@ function getURLArgs() {
         'address': addr
       }, function (result, status) {
 
-        if (status === google.maps.GeocoderStatus.OK && result.length > 0) {
+        if (status === google.maps.GeocoderStatus.OK && result.length > 0 && err == false) {
+
+          $('body, html').css('cursor', 'wait');
+
           addr = result[0].formatted_address;
 
           $.ajax({
@@ -1064,7 +1145,8 @@ function getURLArgs() {
             data: {
               address: addr,
               rating: rating,
-              content: content
+              content: content,
+              email: email
             },
             success: function success(msg) {
               if (msg == 0) {
@@ -1087,6 +1169,8 @@ function getURLArgs() {
                     $('#newReviewModal').modal('hide');
 
                     showAlert('success', 'Review successfully added!');
+
+                    $('body, html').css('cursor', 'default');
                   });
                 }
               }
@@ -1162,7 +1246,7 @@ function getURLArgs() {
      */
 
     function showError(target, msg) {
-      var errmsg = '<small style="color: red;" class="form-text text-muted err-text">' + msg + '</small>';
+      var errmsg = '<small style="color: red; display: block; margin-top: 3px;" class="form-text text-muted err-text">' + msg + '</small>';
       $(errmsg).insertAfter($(target));
     }
 

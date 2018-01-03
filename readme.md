@@ -9,8 +9,12 @@ Ever wondered any of the following while looking at potential places to move to?
 
 If you answered yes, then this site is for you.  Visit today at [landlord.tinybird.ca](https://landlord.tinybird.ca)
 
+### Bugs
+* Search addresses on secondary pages
+* Geolocatio off warning shows evey time you navigate to the main map
+
 ### Todo
-* Fix bug on new review page
-* Style it up baby with the cool new logo
-* Footer and the like
 * Google analytics
+* Link in email to go to your ad
+* Clean up main JS file
+* Make SCSS and JS files into partials

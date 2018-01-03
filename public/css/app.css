@@ -1,5 +1,11 @@
 @import url(https://fonts.googleapis.com/css?family=Roboto:300,400,600);@charset "UTF-8";
 
+/* Fonts*/
+
+/* Variables*/
+
+/* Bootstrap*/
+
 /*!
  * Bootstrap v3.3.7 (http://getbootstrap.com)
  * Copyright 2011-2016 Twitter, Inc.
@@ -8400,8 +8406,8 @@ body {
   display: -ms-flexbox;
   display: flex;
   -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
 }
 
 .menu {
@@ -8409,8 +8415,8 @@ body {
   display: -ms-flexbox;
   display: flex;
   -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
   margin: 0 15px;
   padding: 0 12px;
   float: left;
@@ -8423,7 +8429,7 @@ body {
   outline: none !important;
   text-align: left;
   -webkit-box-shadow: 0px 1px 3px #ccc;
-          box-shadow: 0px 1px 3px #ccc;
+  box-shadow: 0px 1px 3px #ccc;
 }
 
 .menu small {
@@ -8475,7 +8481,7 @@ body {
 
 .search-bar {
   -webkit-box-shadow: 0px 1px 3px #ccc;
-          box-shadow: 0px 1px 3px #ccc;
+  box-shadow: 0px 1px 3px #ccc;
   width: 100%;
   padding: 12px 20px;
   outline: none !important;
@@ -8519,14 +8525,20 @@ body {
 
 /*  Single location styles  */
 
-.preview-map {
+.content {
+  padding: 1px 7%;
+}
+
+.preview-map,
+.placeholder-map {
   width: 100%;
   height: 200px;
   display: block;
 }
 
-.reviews-container {
-  padding: 1px 7%;
+.placeholder-map {
+  -webkit-filter: blur(3px);
+  filter: blur(3px);
 }
 
 .single-review {
@@ -8542,6 +8554,9 @@ body {
 .breadcrumb {
   padding-left: 7%;
   padding-right: 7%;
+  margin-top: -4px;
+  position: relative;
+  z-index: 3;
 }
 
 .avg-rating {

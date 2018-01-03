@@ -12,6 +12,11 @@
     <ul class="dropdown-menu location-dropdown"></ul>
   </div>
   <div class="form-group">
+    <label for="new-review-address">Your Email Address</label>
+    <input type="email" name="new-review-email" id="new-review-email" class="form-control" placeholder="you@example.com" aria-describedby="emailHelp" /> 
+    <small id="emailHelp" class="form-text text-muted">We will never store, display or share your email with anybody.</small>
+  </div>
+  <div class="form-group">
     <label for="new-review-rating">Rating</label>
     <input type="hidden" name="new-review-rating" class="form-control" id="new-review-rating" value="0">
   

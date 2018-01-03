@@ -9,7 +9,7 @@
     <li><a href="/">Home</a></li>
     <li class='active'>Reviews for {{ explode(',', $location->coordinates)[0] }}</li>
   </ol>
-  <div class="reviews-container">
+  <div class="reviews-container content">
     <h1>Reviews for <span class='addr'>{{ $location->coordinates }}</span></h1>
     <p class="avg-rating"><small>Average rating: 
     @for($i = 0; $i < $avg; $i++)
